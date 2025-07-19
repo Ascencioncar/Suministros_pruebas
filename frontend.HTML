@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Productos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-refresh {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            margin-bottom: 20px;
+        }
+
+        .btn-refresh:hover {
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .products-list {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .products-list h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .product-item:hover {
+            background: white;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .product-description {
+            color: #718096;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .product-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Gestor de Productos</h1>
+            <p>Administra tus productos de forma fácil y rápida</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Formulario para crear productos -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                    Crear Nuevo Producto
+                </h2>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="nombre">Nombre del Producto</label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ej: Ibuprofeno">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" required placeholder="Describe las características del producto..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="creado_por">Creado por</label>
+                        <select id="creado_por" name="creado_por" required>
+                            <option value="">Selecciona un usuario</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submitBtn">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z"></path>
+                        </svg>
+                        Crear Producto
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lista de productos -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 7h-9"></path>
+                        <path d="M14 17H5"></path>
+                        <circle cx="17" cy="17" r="3"></circle>
+                        <circle cx="7" cy="7" r="3"></circle>
+                    </svg>
+                    Vista Rápida
+                </h2>
+                <button class="btn btn-refresh" onclick="loadProducts()">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10"></path>
+                        <path d="M3.51 15A9 9 0 0 0 18.36 18.36L23 14"></path>
+                    </svg>
+                    Actualizar
+                </button>
+                <div id="quickView">
+                    <div class="loading">Cargando productos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista completa de productos -->
+        <div class="products-list">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                Todos los Productos
+            </h2>
+            <div id="productsList">
+                <div class="loading">Cargando productos...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const API_BASE = 'https://suministros-pruebas.vercel.app';
+        let productos = [];
+        let usuarios = [];
+
+        // Cargar datos iniciales
+        async function init() {
+            try {
+                await Promise.all([loadUsers(), loadProducts()]);
+            } catch (error) {
+                showNotification('Error al cargar los datos iniciales', 'error');
+            }
+        }
+
+        // Cargar usuarios
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/usuarios`);
+                usuarios = await response.json();
+                
+                const select = document.getElementById('creado_por');
+                select.innerHTML = '<option value="">Selecciona un usuario</option>';
+                
+                usuarios.forEach(usuario => {
+                    const option = document.createElement('option');
+                    option.value = usuario.id;
+                    option.textContent = `${usuario.nombre} ${usuario.apellido}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                showNotification('Error al cargar usuarios', 'error');
+            }
+        }
+
+        // Cargar productos
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE}/productos`);
+                productos = await response.json();
+                renderProducts();
+                renderQuickView();
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+                showNotification('Error al cargar productos', 'error');
+            }
+        }
+
+        // Renderizar productos
+        function renderProducts() {
+            const container = document.getElementById('productsList');
+            
+            if (!productos || productos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <h3>No hay productos</h3>
+                        <p>Crea tu primer producto usando el formulario</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = productos.map(producto => {
+                const usuario = usuarios.find(u => u.id === producto.creado_por);
+                const usuarioNombre = usuario ? `${usuario.nombre} ${usuario.apellido}` : 'Usuario desconocido';
+                const fecha = producto.fecha_creacion ? new Date(producto.fecha_creacion).toLocaleDateString() : 'Fecha no disponible';
+                
+                return `
+                    <div class="product-item">
+                        <div class="product-name">${producto.nombre}</div>
+                        <div class="product-description">${producto.descripcion}</div>
+                        <div class="product-meta">
+                            <span>👤 ${usuarioNombre}</span>
+                            <span>📅 ${fecha}</span>
+                            <span>🆔 ${producto.id}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Renderizar vista rápida
+        function renderQuickView() {
+            const container = document.getElementById('quickView');
+            const ultimosProductos = productos.slice(0, 3);
+            
+            if (ultimosProductos.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No hay productos para mostrar</p></div>';
+                return;
+            }
+
+            container.innerHTML = ultimosProductos.map(producto => `
+                <div class="product-item">
+                    <div class="product-name">${producto.nombre}</div>
+                    <div class="product-description">${producto.descripcion.substring(0, 100)}${producto.descripcion.length > 100 ? '...' : ''}</div>
+                </div>
+            `).join('');
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                nombre: formData.get('nombre').trim(),
+                descripcion: formData.get('descripcion').trim(),
+                creado_por: parseInt(formData.get('creado_por'))
+            };
+
+            if (!data.nombre || !data.descripcion || !data.creado_por) {
+                showNotification('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Creando...';
+
+            try {
+                const response = await fetch(`${API_BASE}/productos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const nuevoProducto = await response.json();
+                    productos.unshift(nuevoProducto);
+                    renderProducts();
+                    renderQuickView();
+                    e.target.reset();
+                    showNotification('Producto creado exitosamente', 'success');
+                } else {
+                    throw new Error('Error al crear el producto');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al crear el producto', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z"></path>
+                    </svg>
+                    Crear Producto
+                `;
+            }
+        });
+
+        // Mostrar notificación
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Inicializar la aplicación
+        init();
+    </script>
+</body>
+</html>
