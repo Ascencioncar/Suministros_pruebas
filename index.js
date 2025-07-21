@@ -4,11 +4,16 @@ const app = express();
 
 const usuariosRouter = require('./routes/usuarios');
 const productosRouter = require('./routes/productos');
+const inventarioRouter = require('./routes/inventario');
+
+
+
 
 app.use(cors());
 app.use(express.json());
 
 app.use('/usuarios', usuariosRouter);
+app.use('/inventario', inventarioRouter);
 app.use('/productos', productosRouter);
 
 
